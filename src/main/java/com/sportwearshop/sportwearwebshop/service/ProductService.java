@@ -43,5 +43,19 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    public String checkStock(int productId) {
+        Optional<Product> product = productRepository.findById(productId);
+
+        if (product.isPresent()) {
+            if (product.get().getStock() == 0) {
+                return "We do not have such a product yet.";
+            } else {
+                return "Stock available for " + product.get().getName() + ": " + product.get().getStock();
+            }
+        } else {
+            throw new RuntimeException("Product not found with ID: " + productId);
+        }
+    }
+
 
 }

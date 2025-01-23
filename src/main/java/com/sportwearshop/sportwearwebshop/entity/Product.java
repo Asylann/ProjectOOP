@@ -13,15 +13,20 @@ public class Product {
 
     @Column(nullable = false)
     private String name;
+
     @Column
     private String description;
+
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
     @Column(nullable = false)
     private Double price;
+
     @Column(nullable = false)
     private Integer stock;
+
     @Column
     private String size;
 
@@ -81,4 +86,5 @@ public class Product {
         this.size = size;
     }
 }
+
 
