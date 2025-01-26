@@ -1,11 +1,1 @@
-PUT http://localhost:8080/products/7
-Content-Type: application/json
-
-{
-  "name": "Updated Basketball",
-  "description": "Updated high-quality basketball",
-  "category": {"id": 3},
-  "price": 9999.99,
-  "stock": 25,
-  "size": "7"
-}
+DELETE localhost:8080/products/11

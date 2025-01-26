@@ -15,18 +15,28 @@ public class ProductController {
     public ProductController(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
+
     @GetMapping
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
+
     @GetMapping("/category/{categoryId}")
-    public List<Product> getProductsByCategory(@PathVariable Long categoryId) {
+    public List<Product> getProductsByCategory(@PathVariable int categoryId) {
         return productRepository.findByCategory_Id(categoryId);
     }
+
+    @GetMapping("/{id}")
+    public Product getProductById(@PathVariable int id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+    }
+
     @PostMapping
     public Product addProduct(@RequestBody Product product) {
         return productRepository.save(product);
     }
+
     @PutMapping("/{id}")
     public Product updateProduct(@PathVariable int id, @RequestBody Product updatedProduct) {
         return productRepository.findById(id)
@@ -41,6 +51,7 @@ public class ProductController {
                 })
                 .orElseThrow(() -> new RuntimeException("Product not found with id " + id));
     }
+
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable int id) {
         if (productRepository.existsById(id)) {
