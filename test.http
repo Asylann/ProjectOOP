@@ -1,1 +1,8 @@
-DELETE localhost:8080/products/11
+POST localhost:8080/api/order-items
+Content-Type: application/json
+
+{
+  "orderId": 5,
+  "productId": 1,
+  "quantity": 3
+}

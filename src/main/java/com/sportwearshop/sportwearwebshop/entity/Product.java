@@ -30,6 +30,8 @@ public class Product {
     @Column
     private String size;
 
+    public Product() {};
+
     public int getId() {
         return id;
     }

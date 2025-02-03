@@ -16,6 +16,8 @@ public class Category {
     @Column
     private String description;
 
+    public Category(){};
+
     public int getId() {
         return id;
     }
