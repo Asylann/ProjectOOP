@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -47,28 +48,30 @@ public class OrderService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        OrderItem orderItem = new OrderItem();
-        orderItem.setOrderId(orderId);
-        orderItem.setProductId(productId);
-        orderItem.setQuantity(quantity);
+        // Check if the item already exists in the order
+        Optional<OrderItem> existingItem = orderItemRepository.findByOrderIdAndProductId(orderId, productId);
+        OrderItem orderItem;
 
-        // Calculate total amount here instead of in the entity
-        Double itemTotal = product.getPrice() * quantity;
-        orderItem.setTotalAmount(itemTotal);
+        if (existingItem.isPresent()) {
+            // Update existing item
+            orderItem = existingItem.get();
+            orderItem.setQuantity(orderItem.getQuantity() + quantity);
+            orderItem.setTotalAmount(orderItem.getTotalAmount() + (product.getPrice() * quantity));
+        } else {
+            orderItem = new OrderItem();
+            orderItem.setOrderId(orderId);
+            orderItem.setProductId(productId);
+            orderItem.setQuantity(quantity);
+            orderItem.setTotalAmount(product.getPrice() * quantity);
+        }
 
         orderItemRepository.save(orderItem);
 
-        List<OrderItem> allItems = getOrderItems(orderId);
-        allItems.add(orderItem);
-        Double orderTotal = allItems.stream()
-                .mapToDouble(OrderItem::getTotalAmount)
-                .sum();
-        order.setTotalAmount(orderTotal);
-
-        orderRepository.save(order);
+        updateOrderTotal(orderId);
 
         return orderItem;
     }
+
 
     public List<OrderItem> getOrderItems(int orderId) {
         return orderItemRepository.findByOrderId(orderId);

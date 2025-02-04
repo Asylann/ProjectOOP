@@ -2,7 +2,7 @@ POST localhost:8080/api/order-items
 Content-Type: application/json
 
 {
-  "orderId": 5,
-  "productId": 1,
+  "orderId": 7,
+  "productId": 7,
   "quantity": 3
 }
