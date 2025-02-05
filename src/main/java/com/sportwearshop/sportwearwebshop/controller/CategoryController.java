@@ -1,6 +1,7 @@
 package com.sportwearshop.sportwearwebshop.controller;
 
 import com.sportwearshop.sportwearwebshop.entity.Category;
+import com.sportwearshop.sportwearwebshop.entity.Product;
 import com.sportwearshop.sportwearwebshop.repository.CategoryRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/categories")
+@RequestMapping("/api/categories")
 public class CategoryController {
 
     private final CategoryRepository categoryRepository;
@@ -27,7 +28,6 @@ public class CategoryController {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found with id:" + id));
     }
-
     @PostMapping
     public Category addCategory(@RequestBody Category category) {
         return categoryRepository.save(category);

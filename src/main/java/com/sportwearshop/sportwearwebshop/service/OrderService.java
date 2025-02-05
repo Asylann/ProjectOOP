@@ -1,18 +1,24 @@
 package com.sportwearshop.sportwearwebshop.service;
 
+import com.sportwearshop.sportwearwebshop.dto.OrderDetailsDTO;
 import com.sportwearshop.sportwearwebshop.entity.Order;
 import com.sportwearshop.sportwearwebshop.entity.OrderItem;
 import com.sportwearshop.sportwearwebshop.entity.Product;
+import com.sportwearshop.sportwearwebshop.entity.User;
+import com.sportwearshop.sportwearwebshop.factory.OrderDTOFactory;
 import com.sportwearshop.sportwearwebshop.repository.OrderItemRepository;
 import com.sportwearshop.sportwearwebshop.repository.OrderRepository;
 import com.sportwearshop.sportwearwebshop.repository.ProductRepository;
+import com.sportwearshop.sportwearwebshop.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -21,10 +27,16 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
-    private OrderItemRepository orderItemRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private OrderDTOFactory orderDTOFactory;
 
     public Order createOrder(int userId, String address) {
         Order order = new Order();
@@ -37,6 +49,14 @@ public class OrderService {
     public Order getOrder(int id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+    }
+
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    public List<OrderItem> getAllOrderItems() {
+        return orderItemRepository.findAll();
     }
 
     public List<Order> getOrdersByUser(int userId) {
@@ -148,5 +168,23 @@ public class OrderService {
 
         order.setTotalAmount(total);
         orderRepository.save(order);
+    }
+
+    public OrderDetailsDTO getFullOrderDescription(int orderId) {
+        Order order = orderRepository.findOrderWithItems(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        User user = userRepository.findById(order.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+
+        List<Integer> productIds = orderItems.stream()
+                .map(OrderItem::getProductId)
+                .collect(Collectors.toList());
+
+        List<Product> products = productRepository.findAllById(productIds);
+
+        return orderDTOFactory.createOrderDetailsDTO(order, user, orderItems, products);
     }
 }

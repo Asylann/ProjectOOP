@@ -2,6 +2,7 @@ package com.sportwearshop.sportwearwebshop.controller;
 
 import com.sportwearshop.sportwearwebshop.dto.OrderItemRequest;
 import com.sportwearshop.sportwearwebshop.entity.OrderItem;
+import com.sportwearshop.sportwearwebshop.entity.Product;
 import com.sportwearshop.sportwearwebshop.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,10 @@ public class OrderItemController {
                 request.getQuantity()
         );
         return new ResponseEntity<>(orderItem, HttpStatus.CREATED);
+    }
+    @GetMapping
+    public List<OrderItem> getAllOrderItems() {
+        return orderService.getAllOrderItems();
     }
 
     @GetMapping("/order/{orderId}")

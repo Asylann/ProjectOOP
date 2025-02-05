@@ -1,7 +1,9 @@
 package com.sportwearshop.sportwearwebshop.controller;
 
+import com.sportwearshop.sportwearwebshop.dto.OrderDetailsDTO;
 import com.sportwearshop.sportwearwebshop.dto.OrderRequest;
 import com.sportwearshop.sportwearwebshop.entity.Order;
+import com.sportwearshop.sportwearwebshop.entity.Product;
 import com.sportwearshop.sportwearwebshop.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,10 @@ public class OrderController {
         Order order = orderService.getOrder(id);
         return ResponseEntity.ok(order);
     }
+    @GetMapping
+    public List<Order> getAllOrders() {
+        return orderService.getAllOrders();
+    }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Order>> getUserOrders(@PathVariable int userId) {
@@ -47,4 +53,9 @@ public class OrderController {
         return ResponseEntity.ok(updatedOrder);
     }
 
+    @GetMapping("/{id}/details")
+    public ResponseEntity<OrderDetailsDTO> getFullOrderDescription(@PathVariable int id) {
+        OrderDetailsDTO orderDetails = orderService.getFullOrderDescription(id);
+        return ResponseEntity.ok(orderDetails);
+    }
 }

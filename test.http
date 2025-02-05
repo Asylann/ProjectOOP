@@ -1,8 +1,1 @@
-POST localhost:8080/api/order-items
-Content-Type: application/json
-
-{
-  "orderId": 7,
-  "productId": 7,
-  "quantity": 3
-}
+GET localhost:8080/api/orders/8/details
