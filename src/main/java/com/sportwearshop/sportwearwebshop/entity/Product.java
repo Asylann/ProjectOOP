@@ -87,6 +87,61 @@ public class Product {
     public void setSize(String size) {
         this.size = size;
     }
+
+    public static class Builder {
+        private Product product;
+
+        public Builder() {
+            product = new Product();
+        }
+
+        public Builder name(String name) {
+            product.name = name;
+            return this;
+        }
+
+        public Builder description(String description) {
+            product.description = description;
+            return this;
+        }
+
+        public Builder category(Category category) {
+            product.category = category;
+            return this;
+        }
+
+        public Builder price(Double price) {
+            product.price = price;
+            return this;
+        }
+
+        public Builder stock(Integer stock) {
+            product.stock = stock;
+            return this;
+        }
+
+        public Builder size(String size) {
+            product.size = size;
+            return this;
+        }
+
+        public Product build() {
+            if (product.name == null || product.name.trim().isEmpty()) {
+                throw new IllegalStateException("Product name is required");
+            }
+            if (product.category == null) {
+                throw new IllegalStateException("Product category is required");
+            }
+            if (product.price == null || product.price <= 0) {
+                throw new IllegalStateException("Valid product price is required");
+            }
+            if (product.stock == null || product.stock < 0) {
+                throw new IllegalStateException("Valid product stock is required");
+            }
+
+            return product;
+        }
+    }
 }
 
 

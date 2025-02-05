@@ -1,7 +1,10 @@
 package com.sportwearshop.sportwearwebshop.service;
 
 
+import com.sportwearshop.sportwearwebshop.dto.ProductDTO;
+import com.sportwearshop.sportwearwebshop.entity.Category;
 import com.sportwearshop.sportwearwebshop.entity.Product;
+import com.sportwearshop.sportwearwebshop.repository.CategoryRepository;
 import com.sportwearshop.sportwearwebshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,10 +17,12 @@ public class ProductService {
 
     private ProductRepository productRepository;
 
-    @Autowired
-    public ProductService(ProductRepository productRepository){
+    private CategoryRepository categoryRepository;
 
+    @Autowired
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public List<Product> getProducts() {
@@ -55,5 +60,20 @@ public class ProductService {
         } else {
             throw new RuntimeException("Product not found with ID: " + productId);
         }
+    }
+    public Product createProductByBuilder(ProductDTO dto) {
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        Product product = new Product.Builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .category(category)
+                .price(dto.getPrice())
+                .stock(dto.getStock())
+                .size(dto.getSize())
+                .build();
+
+        return productRepository.save(product);
     }
 }

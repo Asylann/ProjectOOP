@@ -1,8 +1,15 @@
 package com.sportwearshop.sportwearwebshop.controller;
 
+import com.sportwearshop.sportwearwebshop.dto.OrderRequest;
+import com.sportwearshop.sportwearwebshop.dto.ProductDTO;
+import com.sportwearshop.sportwearwebshop.entity.Order;
 import com.sportwearshop.sportwearwebshop.entity.Product;
 import com.sportwearshop.sportwearwebshop.repository.ProductRepository;
+import com.sportwearshop.sportwearwebshop.service.OrderService;
+import com.sportwearshop.sportwearwebshop.service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -12,8 +19,11 @@ import java.util.List;
 @RequestMapping("/api/products")
 public class ProductController {
     private final ProductRepository productRepository;
-    public ProductController(ProductRepository productRepository) {
+    private final ProductService productService;
+
+    public ProductController(ProductRepository productRepository, ProductService productService) {
         this.productRepository = productRepository;
+        this.productService = productService;
     }
 
     @GetMapping
@@ -30,11 +40,6 @@ public class ProductController {
     public Product getProductById(@PathVariable int id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-    }
-
-    @PostMapping
-    public Product addProduct(@RequestBody Product product) {
-        return productRepository.save(product);
     }
 
     @PutMapping("/{id}")
@@ -61,6 +66,11 @@ public class ProductController {
         }
     }
 
+    @PostMapping
+    public Product createProduct(@RequestBody ProductDTO request){
+        Product product = productService.createProductByBuilder(request);
+        return product;
+    }
 }
 
 
