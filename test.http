@@ -2,9 +2,9 @@ POST localhost:8080/api/products
 Content-Type: application/json
 
 {
-  "name": "Tennis-Cap",
-  "description": "Pro",
+  "name": "TennisBro",
+  "description": "Pro-Comfort",
   "categoryId": 2,
-  "price": 10000,
-  "stock": 5
+  "price": 15000,
+  "stock": 50
 }
