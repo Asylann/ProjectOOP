@@ -18,7 +18,6 @@ public class UserService {
     public User registerUser(User user) {
         return userRepository.save(user);
     }
-
     public Optional<User> getUserById(Integer id) {
         return userRepository.findById(id);
     }
@@ -39,4 +38,3 @@ public class UserService {
     public void deleteUser(Integer id) {
         userRepository.deleteById(id);
     }
-}
