@@ -1,7 +1,10 @@
+POST localhost:8080/categories
 POST localhost:8080/api/products
 Content-Type: application/json
 
 {
+  "name": "T-shirts",
+  "description": "Ordinaries"
   "name": "Tennis-Cap",
   "description": "Pro",
   "categoryId": 2,
