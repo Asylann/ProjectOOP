@@ -2,8 +2,6 @@ POST localhost:8080/api/products
 Content-Type: application/json
 
 {
-  "name": "TennisBro",
-  "description": "Pro-Comfort",
   "categoryId": 2,
   "price": 15000,
   "stock": 50
