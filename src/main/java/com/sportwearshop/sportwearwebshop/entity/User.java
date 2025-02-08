@@ -12,7 +12,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(nullable = false)
-    @Size(min = 6)
+    @Size(min = 5)
     private String password;
     @Column
     private String email;
