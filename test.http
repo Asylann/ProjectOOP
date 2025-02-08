@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
   "name": "T-shirts",
-  "description": "Ordinaries"
+  "description": "Ordinaries",
   "name": "Tennis-Cap",
   "description": "Pro",
   "categoryId": 2,
