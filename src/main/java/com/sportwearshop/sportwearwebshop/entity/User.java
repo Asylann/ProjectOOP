@@ -1,5 +1,6 @@
 package com.sportwearshop.sportwearwebshop.entity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +12,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(nullable = false)
+    @Size(min = 6)
     private String password;
     @Column
     private String email;
