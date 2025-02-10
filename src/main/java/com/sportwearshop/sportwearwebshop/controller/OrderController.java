@@ -1,50 +1,57 @@
 package com.sportwearshop.sportwearwebshop.controller;
 
-import com.sportwearshop.sportwearwebshop.dto.OrderRequest;
 import com.sportwearshop.sportwearwebshop.entity.Order;
-import com.sportwearshop.sportwearwebshop.service.OrderService;
+import com.sportwearshop.sportwearwebshop.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/orders")
 public class OrderController {
-    @Autowired
-    private OrderService orderService;
 
-    @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody OrderRequest request) {
-        Order order = orderService.createOrder(request.getUserId(), request.getAddress());
-        return new ResponseEntity<>(order, HttpStatus.CREATED);
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @GetMapping
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrder(@PathVariable int id) {
-        Order order = orderService.getOrder(id);
-        return ResponseEntity.ok(order);
+    public ResponseEntity<Order> getOrderById(@PathVariable Integer id) {
+        return orderRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Order>> getUserOrders(@PathVariable int userId) {
-        List<Order> orders = orderService.getOrdersByUser(userId);
-        return ResponseEntity.ok(orders);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable int id) {
-        orderService.deleteOrder(id);
-        return ResponseEntity.noContent().build();
+    @PostMapping
+    public Order createOrder(@RequestBody Order order) {
+        return orderRepository.save(order);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Order> updateOrder(@PathVariable int id, @RequestBody OrderRequest request) {
-        Order updatedOrder = orderService.updateOrder(id, request.getUserId(), request.getAddress());
-        return ResponseEntity.ok(updatedOrder);
+    public ResponseEntity<Order> updateOrder(@PathVariable Integer id, @RequestBody Order updatedOrder) {
+        return orderRepository.findById(id).map(order -> {
+            order.setDate(updatedOrder.getDate());
+            order.setUserId(updatedOrder.getUserId());
+            order.setAddress(updatedOrder.getAddress());
+            order.setTotalAmount(updatedOrder.getTotalAmount());
+            return ResponseEntity.ok(orderRepository.save(order));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Integer id) {
+        if (orderRepository.existsById(id)) {
+            orderRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
+
+

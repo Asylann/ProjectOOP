@@ -1,10 +1,10 @@
 package com.sportwearshop.sportwearwebshop.controller;
 
 import com.sportwearshop.sportwearwebshop.entity.User;
-import com.sportwearshop.sportwearwebshop.entity.User;
-import com.sportwearshop.sportwearwebshop.repository.UserRepository;
 import com.sportwearshop.sportwearwebshop.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,35 +14,57 @@ import java.util.List;
 @RequestMapping("/user")
 public class UserController {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserRepository userRepository) { this.userRepository = userRepository; }
+    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
 
     @GetMapping
-    public List<User> getAllUsers() { return userRepository.findAll(); }
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 
     @PostMapping
-    public User addUser(@RequestBody User user) { return userRepository.save(user); }
+    public ResponseEntity<?> addUser(@RequestBody User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body("User added successfully!");
+    }
 
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable int id, @RequestBody User updatedUser) {
+    public ResponseEntity<?> updateUser(@PathVariable int id, @RequestBody User updatedUser) {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setEmail(updatedUser.getEmail());
-                    user.setPassword(updatedUser.getPassword());
-
-                    return userRepository.save(user);
+                    user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+                    userRepository.save(user);
+                    return ResponseEntity.ok("User updated successfully!");
                 })
-                .orElseThrow(() -> new RuntimeException("No user with this id " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable int id) {
+    public ResponseEntity<?> deleteUser(@PathVariable int id) {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
+            return ResponseEntity.ok("User deleted successfully!");
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already exists!");
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully!");
+    }
 }
+
 
