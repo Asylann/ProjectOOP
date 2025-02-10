@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sportwear Shop - Products</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background: #f4f4f4;
+    }
+
+    .navbar {
+      background: #333;
+      padding: 1rem 2rem;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar-brand {
+      color: white;
+      font-size: 1.5rem;
+      text-decoration: none;
+    }
+
+    .navbar-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .navbar-links a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .navbar-links a:hover {
+      background: #555;
+    }
+
+    .main-content {
+      margin-top: 80px;
+      padding: 2rem;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .filters {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .filters select {
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      min-width: 150px;
+      cursor: pointer;
+    }
+
+    .filters select:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 250px;
+      background: #eee;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .product-card:hover .product-image img {
+      transform: scale(1.05);
+    }
+
+    .product-info {
+      padding: 1.5rem;
+    }
+
+    .product-category {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .product-name {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+
+    .product-description {
+      color: #666;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .product-price {
+      font-size: 1.4rem;
+      color: #007bff;
+      margin-bottom: 1rem;
+      font-weight: bold;
+    }
+
+    .add-to-cart {
+      width: 100%;
+      padding: 1rem;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .add-to-cart:hover {
+      background: #218838;
+    }
+
+    .cart-badge {
+      background: #dc3545;
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 2rem;
+      background: #28a745;
+      color: white;
+      border-radius: 5px;
+      transform: translateX(200%);
+      transition: transform 0.3s;
+      z-index: 1001;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="/" class="navbar-brand">Sportwear Shop</a>
+  <div class="navbar-links">
+    <span id="userEmail" style="color: white;"></span>
+    <a href="cart.html">Cart <span id="cartCount" class="cart-badge">0</span></a>
+    <a href="#" onclick="logout()">Logout</a>
+  </div>
+</nav>
+
+<div id="notification" class="notification">Item added to cart!</div>
+
+<main class="main-content">
+  <div class="filters">
+    <select id="categoryFilter" onchange="filterProducts()">
+      <option value="">All Categories</option>
+    </select>
+    <select id="priceFilter" onchange="filterProducts()">
+      <option value="">Price Range</option>
+      <option value="0-50">$0 - $50</option>
+      <option value="51-100">$51 - $100</option>
+      <option value="101-200">$101 - $200</option>
+      <option value="201+">$201+</option>
+    </select>
+    <select id="sortFilter" onchange="filterProducts()">
+      <option value="">Sort By</option>
+      <option value="price-asc">Price: Low to High</option>
+      <option value="price-desc">Price: High to Low</option>
+      <option value="name">Name</option>
+    </select>
+  </div>
+
+  <div class="products-grid" id="productsContainer"></div>
+</main>
+
+<script>
+  // Sample product data
+  const sampleProducts = [
+    {
+      id: 1,
+      name: "Pro Running Shoes",
+      description: "Professional grade running shoes with advanced cushioning technology",
+      price: 129.99,
+      category: { id: 1, name: "Footwear" },
+      image: "/api/placeholder/280/250"
+    },
+    {
+      id: 2,
+      name: "Performance T-Shirt",
+      description: "Moisture-wicking athletic t-shirt for maximum comfort",
+      price: 34.99,
+      category: { id: 2, name: "Clothing" },
+      image: "/api/placeholder/280/250"
+    },
+    {
+      id: 3,
+      name: "Training Shorts",
+      description: "Lightweight training shorts with built-in compression liner",
+      price: 45.99,
+      category: { id: 2, name: "Clothing" },
+      image: "/api/placeholder/280/250"
+    },
+    {
+      id: 4,
+      name: "Compression Socks",
+      description: "High-performance compression socks for better circulation",
+      price: 19.99,
+      category: { id: 3, name: "Accessories" },
+      image: "/api/placeholder/280/250"
+    },
+    {
+      id: 5,
+      name: "Basketball Shoes",
+      description: "Professional basketball shoes with ankle support",
+      price: 159.99,
+      category: { id: 1, name: "Footwear" },
+      image: "/api/placeholder/280/250"
+    },
+    {
+      id: 6,
+      name: "Sports Water Bottle",
+      description: "1L sports water bottle with measurement markings",
+      price: 24.99,
+      category: { id: 3, name: "Accessories" },
+      image: "/api/placeholder/280/250"
+    }
+  ];
+
+  let products = [...sampleProducts];
+  let cartItems = parseInt(localStorage.getItem('cartCount')) || 0;
+  document.getElementById('cartCount').textContent = cartItems;
+  document.getElementById('userEmail').textContent = localStorage.getItem('userEmail');
+
+  // Load categories from sample products
+  function loadCategories() {
+    const categories = [...new Set(sampleProducts.map(p => p.category.name))];
+    const categorySelect = document.getElementById('categoryFilter');
+
+    categories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      categorySelect.appendChild(option);
+    });
+  }
+
+  function displayProducts(productsToShow) {
+    const container = document.getElementById('productsContainer');
+    container.innerHTML = '';
+
+    productsToShow.forEach(product => {
+      const productDiv = document.createElement('div');
+      productDiv.className = 'product-card';
+      productDiv.innerHTML = `
+                <div class="product-image">
+                    <img src="${product.image}" alt="${product.name}">
+                </div>
+                <div class="product-info">
+                    <div class="product-category">${product.category.name}</div>
+                    <h3 class="product-name">${product.name}</h3>
+                    <p class="product-description">${product.description}</p>
+                    <p class="product-price">$${product.price.toFixed(2)}</p>
+                    <button class="add-to-cart" onclick="addToCart(${product.id})">
+                        Add to Cart
+                    </button>
+                </div>
+            `;
+      container.appendChild(productDiv);
+    });
+  }
+
+  function showNotification() {
+    const notification = document.getElementById('notification');
+    notification.classList.add('show');
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 2000);
+  }
+
+  function addToCart(productId) {
+    cartItems++;
+    localStorage.setItem('cartCount', cartItems);
+    document.getElementById('cartCount').textContent = cartItems;
+    showNotification();
+  }
+
+  function filterProducts() {
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    const priceFilter = document.getElementById('priceFilter').value;
+    const sortFilter = document.getElementById('sortFilter').value;
+
+    let filtered = [...products];
+
+    // Apply category filter
+    if (categoryFilter) {
+      filtered = filtered.filter(p => p.category.name === categoryFilter);
+    }
+
+    // Apply price filter
+    if (priceFilter) {
+      const [min, max] = priceFilter.split('-').map(Number);
+      filtered = filtered.filter(p => {
+        if (max) {
+          return p.price >= min && p.price <= max;
+        } else {
+          return p.price >= min;
+        }
+      });
+    }
+
+    // Apply sorting
+    if (sortFilter) {
+      switch(sortFilter) {
+        case 'price-asc':
+          filtered.sort((a, b) => a.price - b.price);
+          break;
+        case 'price-desc':
+          filtered.sort((a, b) => b.price - a.price);
+          break;
+        case 'name':
+          filtered.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+      }
+    }
+
+    displayProducts(filtered);
+  }
+
+  function logout() {
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('cartCount');
+    window.location.href = 'login.html';
+  }
+
+  // Initialize the page
+  loadCategories();
+  displayProducts(products);
+</script>
+</body>
+</html>

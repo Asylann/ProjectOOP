@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart - Sportwear Shop</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background: #f4f4f4;
+    }
+
+    .navbar {
+      background: #333;
+      padding: 1rem 2rem;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar-brand {
+      color: white;
+      font-size: 1.5rem;
+      text-decoration: none;
+    }
+
+    .navbar-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .navbar-links a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .cart-container {
+      max-width: 800px;
+      margin: 100px auto 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f4f4f4;
+    }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 100px 2fr 1fr 1fr 1fr auto;
+      align-items: center;
+      gap: 20px;
+      padding: 15px 0;
+      border-bottom: 1px solid #f4f4f4;
+    }
+
+    .cart-item img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quantity-btn {
+      background: #f4f4f4;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .quantity-btn:hover {
+      background: #e4e4e4;
+    }
+
+    .remove-btn {
+      color: #dc3545;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      transition: color 0.3s;
+    }
+
+    .remove-btn:hover {
+      color: #c82333;
+    }
+
+    .cart-summary {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 5px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .checkout-button {
+      width: 100%;
+      padding: 15px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 20px;
+    }
+
+    .checkout-button:hover {
+      background: #218838;
+    }
+
+    .empty-cart {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .empty-cart a {
+      color: #007bff;
+      text-decoration: none;
+      margin-top: 10px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="/" class="navbar-brand">Sportwear Shop</a>
+  <div class="navbar-links">
+    <span id="userEmail" style="color: white;"></span>
+    <a href="products.html">Continue Shopping</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </div>
+</nav>
+
+<div class="cart-container">
+  <div class="cart-header">
+    <h2>Your Shopping Cart</h2>
+    <span id="cartItemCount"></span>
+  </div>
+  <div id="cartItems"></div>
+  <div id="cartSummary" class="cart-summary"></div>
+</div>
+
+<script>
+  let cartItems = [];
+  const userEmail = localStorage.getItem('userEmail');
+  document.getElementById('userEmail').textContent = userEmail;
+
+  async function loadCart() {
+    try {
+      const response = await fetch('http://localhost:8080/api/cart', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to load cart');
+
+      cartItems = await response.json();
+      displayCart();
+    } catch (error) {
+      console.error('Error loading cart:', error);
+      showError('Failed to load cart. Please try again later.');
+    }
+  }
+
+  function displayCart() {
+    const cartDiv = document.getElementById('cartItems');
+    const summaryDiv = document.getElementById('cartSummary');
+
+    if (cartItems.length === 0) {
+      cartDiv.innerHTML = `
+                <div class="empty-cart">
+                    <h3>Your cart is empty</h3>
+                    <p>Looks like you haven't added any items yet.</p>
+                    <a href="products.html">Continue Shopping</a>
+                </div>
+            `;
+      summaryDiv.style.display = 'none';
+      return;
+    }
+
+    cartDiv.innerHTML = cartItems.map(item => `
+            <div class="cart-item" data-id="${item.id}">
+                <img src="${item.image}" alt="${item.name}">
+                <div>
+                    <h3>${item.name}</h3>
+                    <p>${item.description}</p>
+                </div>
+                <div>$${item.price.toFixed(2)}</div>
+                <div class="quantity-controls">
+                    <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                    <span>${item.quantity}</span>
+                    <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                </div>
+                <div>$${(item.price * item.quantity).toFixed(2)}</div>
+                <button class="remove-btn" onclick="removeItem(${item.id})">✕</button>
+            </div>
+        `).join('');
+
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shipping = subtotal > 100 ? 0 : 10;
+    const total = subtotal + shipping;
+
+    summaryDiv.innerHTML = `
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span>$${subtotal.toFixed(2)}</span>
+            </div>
+            <div class="summary-row">
+                <span>Shipping</span>
+                <span>${shipping === 0 ? 'Free' : '$' + shipping.toFixed(2)}</span>
+            </div>
+            <div class="summary-row" style="font-weight: bold;">
+                <span>Total</span>
+                <span>$${total.toFixed(2)}</span>
+            </div>
+            <button class="checkout-button" onclick="checkout()">Proceed to Checkout</button>
+        `;
+  }
+
+  async function updateQuantity(itemId, newQuantity) {
+    if (newQuantity < 1) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/cart/items/${itemId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ quantity: newQuantity })
+      });
+
+      if (!response.ok) throw new Error('Failed to update quantity');
+
+      await loadCart();
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      showError('Failed to update quantity. Please try again.');
+    }
+  }
+
+  async function removeItem(itemId) {
+    try {
+      const response = await fetch(`http://localhost:8080/api/cart/items/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to remove item');
+
+      await loadCart();
+    } catch (error) {
+      console.error('Error removing item:', error);
+      showError('Failed to remove item. Please try again.');
+    }
+  }
+
+  async function checkout() {
+    try {
+      const response = await fetch('http://localhost:8080/api/orders', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) throw new Error('Checkout failed');
+
+      alert('Order placed successfully!');
+      window.location.href = 'products.html';
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      showError('Checkout failed. Please try again later.');
+    }
+  }
+
+  function showError(message) {
+    // You could implement a more sophisticated error display
+    alert(message);
+  }
+
+  function logout() {
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
+  }
+
+  // Load cart when page opens
+  loadCart();
+</script>
+</body>
+</html>
