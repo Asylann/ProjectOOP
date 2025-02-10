@@ -1,1 +1,7 @@
-GET http://localhost:8080/api/products
+POST localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "Eston@test.com",
+  "password": "test12234"
+}
