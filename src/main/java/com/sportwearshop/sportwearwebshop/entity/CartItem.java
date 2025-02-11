@@ -1,6 +1,5 @@
 package com.sportwearshop.sportwearwebshop.entity;
 
-
 import jakarta.persistence.*;
 
 @Entity
@@ -10,8 +9,20 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @ManyToOne
+    @JoinColumn(name = "cart_id", nullable = false)
+    private Cart cart;
+
     private int productId;
     private int quantity;
+
+    public CartItem() {}
+
+    public CartItem(Cart cart, int productId, int quantity) {
+        this.cart = cart;
+        this.productId = productId;
+        this.quantity = quantity;
+    }
 
     public int getId() {
         return id;
@@ -19,6 +30,14 @@ public class CartItem {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public Cart getCart() {
+        return cart;
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
     }
 
     public int getProductId() {

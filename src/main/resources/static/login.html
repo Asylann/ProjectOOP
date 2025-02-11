@@ -133,22 +133,12 @@
     <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="form-group">
             <label for="email">Email</label>
-            <input
-                    type="email"
-                    id="email"
-                    required
-                    placeholder="Enter your email"
-            >
+            <input type="email" id="email" required placeholder="Enter your email">
             <div class="error-message" id="emailError"></div>
         </div>
         <div class="form-group">
             <label for="password">Password</label>
-            <input
-                    type="password"
-                    id="password"
-                    required
-                    placeholder="Enter your password"
-            >
+            <input type="password" id="password" required placeholder="Enter your password">
             <div class="error-message" id="passwordError"></div>
         </div>
         <button type="submit" class="login-button">Login</button>
@@ -182,28 +172,39 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password }),
+                credentials: 'include' // ✅ Store session cookie
             });
 
             const data = await response.text();
 
             if (data === "Login successful") {
-                localStorage.setItem('userEmail', email);
+                localStorage.setItem('isLoggedIn', 'true'); // ✅ Save login state
                 window.location.href = 'products.html';
             } else {
-                const passwordError = document.getElementById('passwordError');
-                passwordError.textContent = 'Invalid email or password';
-                passwordError.style.display = 'block';
+                document.getElementById('passwordError').textContent = 'Invalid email or password';
+                document.getElementById('passwordError').style.display = 'block';
             }
         } catch (error) {
-            console.error('Error:', error);
-            const emailError = document.getElementById('emailError');
-            emailError.textContent = 'An error occurred. Please try again.';
-            emailError.style.display = 'block';
+            document.getElementById('emailError').textContent = 'An error occurred. Please try again.';
+            document.getElementById('emailError').style.display = 'block';
         } finally {
             loading.style.display = 'none';
             loginButton.disabled = false;
         }
+    }
+
+    // Check if user is logged in before accessing protected pages
+    function checkLogin() {
+        if (!localStorage.getItem('isLoggedIn')) {
+            alert("Please log in first.");
+            window.location.href = "login.html";
+        }
+    }
+
+    // Call this function on protected pages like cart.html
+    if (window.location.pathname.includes("cart.html") || window.location.pathname.includes("checkout.html")) {
+        checkLogin();
     }
 </script>
 </body>

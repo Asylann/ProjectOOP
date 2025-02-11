@@ -1,1 +1,7 @@
-GET http://localhost:8080/api/products
+POST localhost:8080/api/cart/9/add
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 2
+}

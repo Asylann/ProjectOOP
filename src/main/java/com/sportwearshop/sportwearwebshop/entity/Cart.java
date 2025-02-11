@@ -1,7 +1,6 @@
 package com.sportwearshop.sportwearwebshop.entity;
 
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,16 +13,13 @@ public class Cart {
 
     private int userId;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> items = new ArrayList<>();
+
+    public Cart() {}
 
     public Cart(int userId) {
         this.userId = userId;
-        this.items = new ArrayList<>();
-    }
-
-    public Cart() {
-
     }
 
     public int getId() {
@@ -50,3 +46,4 @@ public class Cart {
         this.items = items;
     }
 }
+
